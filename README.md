@@ -1,8 +1,8 @@
-# CryptoGate Payments for WordPress
+# GriffNode Payments for WordPress
 
-Accept Bitcoin, Litecoin, Dogecoin and Dash payments on **any** WordPress site — no WooCommerce required. Drop a pay button anywhere with a shortcode; customers pick a coin and are redirected to a hosted payment page. Funds go directly to your wallet, CryptoGate never holds them.
+Accept Bitcoin, Litecoin, Dogecoin and Dash payments on **any** WordPress site — no WooCommerce required. Drop a pay button anywhere with a shortcode; customers pick a coin and are redirected to a hosted payment page. Funds go directly to your wallet, GriffNode never holds them.
 
-> Running a WooCommerce store? Use the dedicated [CryptoGate for WooCommerce](https://github.com/CryptoGateHQ/woocommerce-plugin) plugin instead — it hooks straight into checkout and orders.
+> Running a WooCommerce store? Use the dedicated [GriffNode for WooCommerce](https://github.com/CryptoGateHQ/woocommerce-plugin) plugin instead — it hooks straight into checkout and orders.
 
 **Requirements:** WordPress 6.0+, PHP 7.4+
 
@@ -22,7 +22,7 @@ Download the latest `cryptogate-payments.zip` from the [Releases](https://github
 
 ### 3 — Configure
 
-Go to **Settings → CryptoGate** and fill in:
+Go to **Settings → GriffNode** and fill in:
 
 | Field | Where to find it |
 |-------|-----------------|
@@ -33,7 +33,7 @@ Go to **Settings → CryptoGate** and fill in:
 
 ### 4 — Register your webhook
 
-In your [CryptoGate dashboard](https://cryptogate.live/dashboard) go to **Webhooks** and add the URL shown on the settings page:
+In your [GriffNode dashboard](https://griffnode.com/dashboard) go to **Webhooks** and add the URL shown on the settings page:
 
 ```
 https://yoursite.com/wp-json/cryptogate/v1/webhook
@@ -77,7 +77,7 @@ When a verified webhook arrives, the plugin fires WordPress actions. Hook into t
 ```php
 add_action( 'cryptogate_payment_completed', function ( $event ) {
     // $event['order_id']       — your `reference` from the shortcode
-    // $event['transaction_id'] — CryptoGate transaction id
+    // $event['transaction_id'] — GriffNode transaction id
     // $event['amount_crypto'], $event['currency_crypto'], ...
     error_log( 'Paid: ' . $event['order_id'] );
 } );
@@ -96,9 +96,9 @@ Only HMAC-verified events reach these hooks.
 ## How it works
 
 1. A visitor selects a cryptocurrency and clicks the button
-2. The plugin calls the CryptoGate API server-side (your secret key never touches the browser) and redirects to a hosted payment page
+2. The plugin calls the GriffNode API server-side (your secret key never touches the browser) and redirects to a hosted payment page
 3. The customer sends the exact crypto amount within the 60-minute window
-4. CryptoGate fires a webhook — the plugin verifies it and triggers the action hooks above
+4. GriffNode fires a webhook — the plugin verifies it and triggers the action hooks above
 
 ---
 
@@ -110,6 +110,6 @@ Use `pk_test_...` / `sk_test_...` keys in the settings. No real funds move in te
 
 ## Support
 
-- [Documentation](https://docs.cryptogate.live)
-- [CryptoGate Dashboard](https://cryptogate.live/dashboard) — open a support ticket
+- [Documentation](https://docs.griffnode.com)
+- [GriffNode Dashboard](https://griffnode.com/dashboard) — open a support ticket
 - [GitHub Issues](https://github.com/CryptoGateHQ/wordpress-plugin/issues)

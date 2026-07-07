@@ -1,4 +1,4 @@
-=== CryptoGate Payments ===
+=== GriffNode Payments ===
 Contributors: cryptogate
 Tags: cryptocurrency, bitcoin, crypto payments, payments, ethereum
 Requires at least: 6.0
@@ -15,7 +15,7 @@ Accept crypto payments anywhere on WordPress via shortcode — Bitcoin, Ethereum
 Accept crypto payments anywhere on WordPress via shortcode — Bitcoin, Ethereum, Litecoin, Dogecoin and more, straight to your own wallet.
 
 Payments are non-custodial: funds settle directly to the merchant's own wallet. Configure your
-CryptoGate API key, and customers can pay in BTC, ETH, LTC, DOGE, DASH and ERC-20 stablecoins.
+GriffNode API key, and customers can pay in BTC, ETH, LTC, DOGE, DASH and ERC-20 stablecoins.
 
 * Non-custodial — funds go to your wallet, not ours
 * No chargebacks, no KYC
@@ -25,7 +25,7 @@ CryptoGate API key, and customers can pay in BTC, ETH, LTC, DOGE, DASH and ERC-2
 
 1. Upload the plugin to `wp-content/plugins/` (or install the zip via Plugins → Add New → Upload).
 2. Activate it.
-3. Enter your CryptoGate API key in the plugin settings.
+3. Enter your GriffNode API key in the plugin settings.
 
 == Changelog ==
 

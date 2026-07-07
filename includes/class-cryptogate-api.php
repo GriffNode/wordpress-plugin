@@ -2,7 +2,7 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Thin wrapper over the CryptoGate REST API using the WordPress HTTP layer.
+ * Thin wrapper over the GriffNode REST API using the WordPress HTTP layer.
  */
 class CryptoGate_API {
 
