@@ -12,7 +12,7 @@ Accept Bitcoin, Litecoin, Dogecoin and Dash payments on **any** WordPress site �
 
 ### 1 — Download
 
-Download the latest `cryptogate-payments.zip` from the [Releases](https://github.com/CryptoGateHQ/wordpress-plugin/releases) page.
+Download the latest `griffnode-payments.zip` from the [Releases](https://github.com/CryptoGateHQ/wordpress-plugin/releases) page.
 
 ### 2 — Install
 
@@ -36,7 +36,7 @@ Go to **Settings → GriffNode** and fill in:
 In your [GriffNode dashboard](https://griffnode.com/dashboard) go to **Webhooks** and add the URL shown on the settings page:
 
 ```
-https://yoursite.com/wp-json/cryptogate/v1/webhook
+https://yoursite.com/wp-json/griffnode/v1/webhook
 ```
 
 Subscribe to: `payment.completed`, `payment.partial`, `payment.expired`. Copy the signing secret into the **Webhook Secret** field.
@@ -52,7 +52,7 @@ The coin selector only shows cryptos you have wallets for. Go to **Dashboard →
 Put the shortcode in any post, page, or widget:
 
 ```
-[cryptogate_button amount="49.99" currency="USD" button_text="Pay with Crypto"]
+[griffnode_button amount="49.99" currency="USD" button_text="Pay with Crypto"]
 ```
 
 | Attribute | Required | Description |
@@ -75,18 +75,18 @@ The amount and currency are **signed server-side**, so a customer can't tamper w
 When a verified webhook arrives, the plugin fires WordPress actions. Hook into them from your theme's `functions.php` or your own plugin to fulfil orders, grant access, send emails, etc.
 
 ```php
-add_action( 'cryptogate_payment_completed', function ( $event ) {
+add_action( 'griffnode_payment_completed', function ( $event ) {
     // $event['order_id']       — your `reference` from the shortcode
     // $event['transaction_id'] — GriffNode transaction id
     // $event['amount_crypto'], $event['currency_crypto'], ...
     error_log( 'Paid: ' . $event['order_id'] );
 } );
 
-add_action( 'cryptogate_payment_partial', function ( $event ) { /* underpaid */ } );
-add_action( 'cryptogate_payment_expired', function ( $event ) { /* window expired */ } );
+add_action( 'griffnode_payment_partial', function ( $event ) { /* underpaid */ } );
+add_action( 'griffnode_payment_expired', function ( $event ) { /* window expired */ } );
 
 // Or catch everything:
-add_action( 'cryptogate_webhook', function ( $event ) { /* $event['event'] = 'payment.completed' ... */ } );
+add_action( 'griffnode_webhook', function ( $event ) { /* $event['event'] = 'payment.completed' ... */ } );
 ```
 
 Only HMAC-verified events reach these hooks.

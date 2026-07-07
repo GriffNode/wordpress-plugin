@@ -4,7 +4,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Thin wrapper over the GriffNode REST API using the WordPress HTTP layer.
  */
-class CryptoGate_API {
+class GriffNode_API {
 
     /**
      * Create a hosted-checkout transaction.
@@ -12,12 +12,12 @@ class CryptoGate_API {
      * @return array{ok:bool, payment_url?:string, txid?:string, error?:string}
      */
     public static function create_transaction( array $payload ): array {
-        $secret = CryptoGate_Settings::get( 'secret_key' );
+        $secret = GriffNode_Settings::get( 'secret_key' );
         if ( ! $secret ) {
             return [ 'ok' => false, 'error' => 'Secret key not configured.' ];
         }
 
-        $response = wp_remote_post( CRYPTOGATE_API_BASE . '/transactions/create', [
+        $response = wp_remote_post( GRIFFNODE_API_BASE . '/transactions/create', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $secret,
                 'Content-Type'  => 'application/json',
@@ -28,7 +28,7 @@ class CryptoGate_API {
         ] );
 
         if ( is_wp_error( $response ) ) {
-            return [ 'ok' => false, 'error' => 'Could not reach CryptoGate.' ];
+            return [ 'ok' => false, 'error' => 'Could not reach GriffNode.' ];
         }
 
         $body = json_decode( wp_remote_retrieve_body( $response ), true );

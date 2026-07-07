@@ -4,12 +4,12 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Admin settings page + option accessors.
  *
- * All settings live in a single option array `cryptogate_settings`:
+ * All settings live in a single option array `griffnode_settings`:
  *   publishable_key, secret_key, webhook_secret, default_currency
  */
-class CryptoGate_Settings {
+class GriffNode_Settings {
 
-    const OPTION = 'cryptogate_settings';
+    const OPTION = 'griffnode_settings';
 
     public static function init() {
         add_action( 'admin_menu', [ __CLASS__, 'add_menu' ] );
@@ -56,20 +56,20 @@ class CryptoGate_Settings {
 
     public static function add_menu() {
         add_options_page(
-            'CryptoGate',
-            'CryptoGate',
+            'GriffNode',
+            'GriffNode',
             'manage_options',
-            'cryptogate-payments',
+            'griffnode-payments',
             [ __CLASS__, 'render_page' ]
         );
     }
 
     public static function register() {
-        register_setting( 'cryptogate_settings_group', self::OPTION, [ __CLASS__, 'sanitize' ] );
+        register_setting( 'griffnode_settings_group', self::OPTION, [ __CLASS__, 'sanitize' ] );
 
-        add_settings_section( 'cryptogate_main', 'API credentials', function () {
-            echo '<p>' . esc_html__( 'Find these in your CryptoGate dashboard under API Integration and Webhooks.', 'cryptogate-payments' ) . '</p>';
-        }, 'cryptogate-payments' );
+        add_settings_section( 'griffnode_main', 'API credentials', function () {
+            echo '<p>' . esc_html__( 'Find these in your GriffNode dashboard under API Integration and Webhooks.', 'griffnode-payments' ) . '</p>';
+        }, 'griffnode-payments' );
 
         $fields = [
             'publishable_key'  => [ 'Publishable Key (pk_live_ / pk_test_)', 'text', 'Used to fetch your supported cryptos on the page. Safe to expose in the browser.' ],
@@ -89,7 +89,7 @@ class CryptoGate_Settings {
                     esc_attr( $val ),
                     esc_html( $help )
                 );
-            }, 'cryptogate-payments', 'cryptogate_main' );
+            }, 'griffnode-payments', 'griffnode_main' );
         }
     }
 
@@ -107,27 +107,27 @@ class CryptoGate_Settings {
         if ( ! current_user_can( 'manage_options' ) ) {
             return;
         }
-        $webhook_url = rest_url( 'cryptogate/v1/webhook' );
+        $webhook_url = rest_url( 'griffnode/v1/webhook' );
         ?>
         <div class="wrap">
-            <h1>CryptoGate Payments</h1>
+            <h1>GriffNode Payments</h1>
             <form method="post" action="options.php">
                 <?php
-                settings_fields( 'cryptogate_settings_group' );
-                do_settings_sections( 'cryptogate-payments' );
+                settings_fields( 'griffnode_settings_group' );
+                do_settings_sections( 'griffnode-payments' );
                 submit_button();
                 ?>
             </form>
 
             <hr />
-            <h2><?php esc_html_e( 'Webhook endpoint', 'cryptogate-payments' ); ?></h2>
-            <p><?php esc_html_e( 'Add this URL in your CryptoGate dashboard under Webhooks and subscribe to payment.completed, payment.partial and payment.expired:', 'cryptogate-payments' ); ?></p>
+            <h2><?php esc_html_e( 'Webhook endpoint', 'griffnode-payments' ); ?></h2>
+            <p><?php esc_html_e( 'Add this URL in your GriffNode dashboard under Webhooks and subscribe to payment.completed, payment.partial and payment.expired:', 'griffnode-payments' ); ?></p>
             <p><code><?php echo esc_url( $webhook_url ); ?></code></p>
 
-            <h2><?php esc_html_e( 'Adding a pay button', 'cryptogate-payments' ); ?></h2>
-            <p><?php esc_html_e( 'Drop this shortcode into any post, page or widget:', 'cryptogate-payments' ); ?></p>
-            <p><code>[cryptogate_button amount="49.99" currency="USD" button_text="Pay with Crypto"]</code></p>
-            <p class="description"><?php esc_html_e( 'Optional attributes: crypto (lock to one coin), reference (your order id), email (pre-fill), success_url, cancel_url.', 'cryptogate-payments' ); ?></p>
+            <h2><?php esc_html_e( 'Adding a pay button', 'griffnode-payments' ); ?></h2>
+            <p><?php esc_html_e( 'Drop this shortcode into any post, page or widget:', 'griffnode-payments' ); ?></p>
+            <p><code>[griffnode_button amount="49.99" currency="USD" button_text="Pay with Crypto"]</code></p>
+            <p class="description"><?php esc_html_e( 'Optional attributes: crypto (lock to one coin), reference (your order id), email (pre-fill), success_url, cancel_url.', 'griffnode-payments' ); ?></p>
         </div>
         <?php
     }

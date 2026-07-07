@@ -2,15 +2,15 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * [cryptogate_button] shortcode — renders a crypto-selector + pay button,
+ * [griffnode_button] shortcode — renders a crypto-selector + pay button,
  * and the admin-ajax endpoint that creates the transaction server-side.
  */
-class CryptoGate_Shortcode {
+class GriffNode_Shortcode {
 
     public static function init() {
-        add_shortcode( 'cryptogate_button', [ __CLASS__, 'render' ] );
-        add_action( 'wp_ajax_cryptogate_create_payment', [ __CLASS__, 'ajax_create' ] );
-        add_action( 'wp_ajax_nopriv_cryptogate_create_payment', [ __CLASS__, 'ajax_create' ] );
+        add_shortcode( 'griffnode_button', [ __CLASS__, 'render' ] );
+        add_action( 'wp_ajax_griffnode_create_payment', [ __CLASS__, 'ajax_create' ] );
+        add_action( 'wp_ajax_nopriv_griffnode_create_payment', [ __CLASS__, 'ajax_create' ] );
     }
 
     /**
@@ -21,23 +21,23 @@ class CryptoGate_Shortcode {
     public static function render( $atts ): string {
         $atts = shortcode_atts( [
             'amount'      => '',
-            'currency'    => CryptoGate_Settings::get( 'default_currency', 'USD' ),
+            'currency'    => GriffNode_Settings::get( 'default_currency', 'USD' ),
             'crypto'      => '',      // lock to a single coin; empty = let customer pick
             'button_text' => 'Pay with Crypto',
             'reference'   => '',      // merchant order id, echoed back in webhooks
             'email'       => '',      // pre-fill the payment page
             'success_url' => '',
             'cancel_url'  => '',
-        ], $atts, 'cryptogate_button' );
+        ], $atts, 'griffnode_button' );
 
-        if ( ! CryptoGate_Settings::get( 'secret_key' ) ) {
+        if ( ! GriffNode_Settings::get( 'secret_key' ) ) {
             return current_user_can( 'manage_options' )
-                ? '<p><strong>CryptoGate:</strong> configure your API keys under Settings → CryptoGate.</p>'
+                ? '<p><strong>GriffNode:</strong> configure your API keys under Settings → GriffNode.</p>'
                 : '';
         }
         if ( ! is_numeric( $atts['amount'] ) || (float) $atts['amount'] <= 0 ) {
             return current_user_can( 'manage_options' )
-                ? '<p><strong>CryptoGate:</strong> the shortcode needs a positive <code>amount</code>.</p>'
+                ? '<p><strong>GriffNode:</strong> the shortcode needs a positive <code>amount</code>.</p>'
                 : '';
         }
 
@@ -54,17 +54,17 @@ class CryptoGate_Shortcode {
             'success_url' => (string) $atts['success_url'],
             'cancel_url'  => (string) $atts['cancel_url'],
         ];
-        $token = CryptoGate_Settings::sign( $config );
-        $pk    = CryptoGate_Settings::get( 'publishable_key' );
+        $token = GriffNode_Settings::sign( $config );
+        $pk    = GriffNode_Settings::get( 'publishable_key' );
         $lock  = strtoupper( $atts['crypto'] );
         $uid   = 'cg-' . substr( md5( $token ), 0, 8 );
 
         ob_start();
         ?>
-        <div class="cryptogate-button-wrap" id="<?php echo esc_attr( $uid ); ?>">
+        <div class="griffnode-button-wrap" id="<?php echo esc_attr( $uid ); ?>">
             <?php if ( ! $lock ) : ?>
                 <select class="cg-crypto" style="margin-bottom:8px;display:block">
-                    <option value=""><?php esc_html_e( 'Loading…', 'cryptogate-payments' ); ?></option>
+                    <option value=""><?php esc_html_e( 'Loading…', 'griffnode-payments' ); ?></option>
                 </select>
             <?php endif; ?>
             <button type="button" class="cg-pay button"><?php echo esc_html( $atts['button_text'] ); ?></button>
@@ -77,11 +77,11 @@ class CryptoGate_Shortcode {
             wrap.dataset.cgInit = '1';
 
             var ajax   = <?php echo wp_json_encode( admin_url( 'admin-ajax.php' ) ); ?>;
-            var nonce  = <?php echo wp_json_encode( wp_create_nonce( 'cryptogate_pay' ) ); ?>;
+            var nonce  = <?php echo wp_json_encode( wp_create_nonce( 'griffnode_pay' ) ); ?>;
             var token  = <?php echo wp_json_encode( $token ); ?>;
             var lock   = <?php echo wp_json_encode( $lock ); ?>;
             var pk     = <?php echo wp_json_encode( $pk ); ?>;
-            var apiBase= <?php echo wp_json_encode( CRYPTOGATE_API_BASE ); ?>;
+            var apiBase= <?php echo wp_json_encode( GRIFFNODE_API_BASE ); ?>;
             var sel    = wrap.querySelector('.cg-crypto');
             var btn    = wrap.querySelector('.cg-pay');
             var msg    = wrap.querySelector('.cg-msg');
@@ -107,7 +107,7 @@ class CryptoGate_Shortcode {
                 msg.textContent = 'Creating payment…';
 
                 var body = new URLSearchParams();
-                body.set('action', 'cryptogate_create_payment');
+                body.set('action', 'griffnode_create_payment');
                 body.set('nonce', nonce);
                 body.set('token', token);
                 body.set('crypto', crypto);
@@ -131,11 +131,11 @@ class CryptoGate_Shortcode {
     }
 
     public static function ajax_create() {
-        if ( ! check_ajax_referer( 'cryptogate_pay', 'nonce', false ) ) {
+        if ( ! check_ajax_referer( 'griffnode_pay', 'nonce', false ) ) {
             wp_send_json_error( [ 'error' => 'Security check failed. Refresh and try again.' ], 400 );
         }
 
-        $config = CryptoGate_Settings::unsign( sanitize_text_field( wp_unslash( $_POST['token'] ?? '' ) ) );
+        $config = GriffNode_Settings::unsign( sanitize_text_field( wp_unslash( $_POST['token'] ?? '' ) ) );
         if ( ! $config || empty( $config['amount'] ) ) {
             wp_send_json_error( [ 'error' => 'Invalid payment request.' ], 400 );
         }
@@ -160,7 +160,7 @@ class CryptoGate_Shortcode {
         if ( ! empty( $config['success_url'] ) ) { $payload['success_url'] = esc_url_raw( $config['success_url'] ); }
         if ( ! empty( $config['cancel_url'] ) )  { $payload['cancel_url'] = esc_url_raw( $config['cancel_url'] ); }
 
-        $result = CryptoGate_API::create_transaction( $payload );
+        $result = GriffNode_API::create_transaction( $payload );
         if ( ! $result['ok'] ) {
             wp_send_json_error( [ 'error' => $result['error'] ], 502 );
         }
