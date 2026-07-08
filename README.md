@@ -2,7 +2,7 @@
 
 Accept Bitcoin, Litecoin, Dogecoin and Dash payments on **any** WordPress site — no WooCommerce required. Drop a pay button anywhere with a shortcode; customers pick a coin and are redirected to a hosted payment page. Funds go directly to your wallet, GriffNode never holds them.
 
-> Running a WooCommerce store? Use the dedicated [GriffNode for WooCommerce](https://github.com/CryptoGateHQ/woocommerce-plugin) plugin instead — it hooks straight into checkout and orders.
+> Running a WooCommerce store? Use the dedicated [GriffNode for WooCommerce](https://github.com/GriffNode/woocommerce-plugin) plugin instead — it hooks straight into checkout and orders.
 
 **Requirements:** WordPress 6.0+, PHP 7.4+
 
@@ -12,7 +12,7 @@ Accept Bitcoin, Litecoin, Dogecoin and Dash payments on **any** WordPress site �
 
 ### 1 — Download
 
-Download the latest `griffnode-payments.zip` from the [Releases](https://github.com/CryptoGateHQ/wordpress-plugin/releases) page.
+Download the latest `griffnode-payments.zip` from the [Releases](https://github.com/GriffNode/wordpress-plugin/releases) page.
 
 ### 2 — Install
 
@@ -112,4 +112,4 @@ Use `pk_test_...` / `sk_test_...` keys in the settings. No real funds move in te
 
 - [Documentation](https://docs.griffnode.com)
 - [GriffNode Dashboard](https://griffnode.com/dashboard) — open a support ticket
-- [GitHub Issues](https://github.com/CryptoGateHQ/wordpress-plugin/issues)
+- [GitHub Issues](https://github.com/GriffNode/wordpress-plugin/issues)
