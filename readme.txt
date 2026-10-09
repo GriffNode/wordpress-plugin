@@ -8,11 +8,11 @@ Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Accept crypto payments anywhere on WordPress with a shortcode. Bitcoin, Ethereum and stablecoins, non-custodial, straight to your own wallet. No KYC.
+Accept crypto payments anywhere on WordPress with a shortcode. Bitcoin, Ethereum and stablecoins, non-custodial, straight to your own wallet. No chargebacks.
 
 == Description ==
 
-**GriffNode Payments lets you accept cryptocurrency anywhere on WordPress with a simple shortcode - no WooCommerce required.** Drop a "Pay with crypto" button into any post, page or widget, and the money settles **straight to your own wallet**. GriffNode is non-custodial: we never hold, touch, or can freeze your funds. There are no chargebacks and no KYC.
+**GriffNode Payments lets you accept cryptocurrency anywhere on WordPress with a simple shortcode - no WooCommerce required.** Drop a "Pay with crypto" button into any post, page or widget, and the money settles **straight to your own wallet**. GriffNode is non-custodial: we never hold, touch, or can freeze your funds. There are no chargebacks.
 
 You connect your wallet's extended public key (xPub) once at [griffnode.com](https://griffnode.com/), and a fresh receiving address is derived for every payment, so funds go customer to you directly.
 
@@ -26,7 +26,7 @@ Optional attributes let you lock to one coin, pre-fill the customer email, or se
 
 * **Non-custodial** - funds settle directly to your wallet, not ours. We literally cannot spend or freeze them.
 * **No chargebacks** - on-chain settlement is final. No clawbacks weeks after you deliver.
-* **No KYC** - because we never custody funds, signing up is just an email and password.
+* **Live in minutes** - sign up, paste your xPub, drop in the shortcode.
 * **Works anywhere** - posts, pages, sidebars, any theme. No WooCommerce, no store required. For WooCommerce stores, use our separate GriffNode for WooCommerce plugin.
 * **Flat monthly pricing** - no percentage per transaction. See [pricing](https://griffnode.com/).
 
@@ -56,9 +56,6 @@ This plugin connects to the GriffNode API (griffnode.com) to create hosted payme
 
 = Do I need WooCommerce? =
 No. This plugin works on any WordPress site via the `[griffnode_button]` shortcode. If you run a WooCommerce store, use our separate GriffNode for WooCommerce plugin instead.
-
-= Do I need KYC or identity verification? =
-No. Because GriffNode never holds your funds, there is no custodial obligation to verify identity. You sign up with an email and password.
 
 = Where does the money go? =
 Directly to your own wallet, every time, via the xPub you connect. GriffNode cannot custody, spend, or freeze it.
