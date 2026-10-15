@@ -64,7 +64,7 @@ class GriffNode_Shortcode {
         <div class="griffnode-button-wrap" id="<?php echo esc_attr( $uid ); ?>">
             <?php if ( ! $lock ) : ?>
                 <select class="cg-crypto" style="margin-bottom:8px;display:block">
-                    <option value=""><?php esc_html_e( 'Loading…', 'griffnode-payments' ); ?></option>
+                    <option value=""><?php esc_html_e( 'Loading…', 'griffnode-crypto-payments' ); ?></option>
                 </select>
             <?php endif; ?>
             <button type="button" class="cg-pay button"><?php echo esc_html( $atts['button_text'] ); ?></button>
