@@ -55,13 +55,12 @@ class GriffNode_Shortcode {
             'cancel_url'  => (string) $atts['cancel_url'],
         ];
         $token = GriffNode_Settings::sign( $config );
-        $pk    = GriffNode_Settings::get( 'publishable_key' );
         $lock  = strtoupper( $atts['crypto'] );
-        $uid   = 'cg-' . substr( md5( $token ), 0, 8 );
+        self::enqueue();
 
         ob_start();
         ?>
-        <div class="griffnode-button-wrap" id="<?php echo esc_attr( $uid ); ?>">
+        <div class="griffnode-button-wrap" data-token="<?php echo esc_attr( $token ); ?>" data-lock="<?php echo esc_attr( $lock ); ?>">
             <?php if ( ! $lock ) : ?>
                 <select class="cg-crypto" style="margin-bottom:8px;display:block">
                     <option value=""><?php esc_html_e( 'Loading…', 'griffnode-crypto-payments' ); ?></option>
@@ -70,64 +69,33 @@ class GriffNode_Shortcode {
             <button type="button" class="cg-pay button"><?php echo esc_html( $atts['button_text'] ); ?></button>
             <span class="cg-msg" style="margin-left:8px"></span>
         </div>
-        <script>
-        (function () {
-            var wrap   = document.getElementById('<?php echo esc_js( $uid ); ?>');
-            if (!wrap || wrap.dataset.cgInit) { return; }
-            wrap.dataset.cgInit = '1';
-
-            var ajax   = <?php echo wp_json_encode( admin_url( 'admin-ajax.php' ) ); ?>;
-            var nonce  = <?php echo wp_json_encode( wp_create_nonce( 'griffnode_pay' ) ); ?>;
-            var token  = <?php echo wp_json_encode( $token ); ?>;
-            var lock   = <?php echo wp_json_encode( $lock ); ?>;
-            var pk     = <?php echo wp_json_encode( $pk ); ?>;
-            var apiBase= <?php echo wp_json_encode( GRIFFNODE_API_BASE ); ?>;
-            var sel    = wrap.querySelector('.cg-crypto');
-            var btn    = wrap.querySelector('.cg-pay');
-            var msg    = wrap.querySelector('.cg-msg');
-
-            if (sel && pk) {
-                fetch(apiBase + '/merchant/cryptos', { headers: { 'Authorization': 'Bearer ' + pk } })
-                    .then(function (r) { return r.json(); })
-                    .then(function (d) {
-                        var list = (d && d.data && d.data.cryptocurrencies) || [];
-                        sel.innerHTML = list.length
-                            ? list.map(function (c) { return '<option value="' + c.symbol + '">' + c.name + ' (' + c.symbol + ')</option>'; }).join('')
-                            : '<option value="">No cryptos configured</option>';
-                    })
-                    .catch(function () { sel.innerHTML = '<option value="">Failed to load</option>'; });
-            } else if (sel) {
-                sel.innerHTML = '<option value="">No publishable key</option>';
-            }
-
-            btn.addEventListener('click', function () {
-                var crypto = lock || (sel ? sel.value : '');
-                if (!crypto) { msg.textContent = 'Please select a cryptocurrency.'; return; }
-                btn.disabled = true;
-                msg.textContent = 'Creating payment…';
-
-                var body = new URLSearchParams();
-                body.set('action', 'griffnode_create_payment');
-                body.set('nonce', nonce);
-                body.set('token', token);
-                body.set('crypto', crypto);
-
-                fetch(ajax, { method: 'POST', body: body })
-                    .then(function (r) { return r.json(); })
-                    .then(function (res) {
-                        if (res && res.success && res.data && res.data.payment_url) {
-                            window.location.href = res.data.payment_url;
-                        } else {
-                            btn.disabled = false;
-                            msg.textContent = (res && res.data && res.data.error) || 'Payment error. Try again.';
-                        }
-                    })
-                    .catch(function () { btn.disabled = false; msg.textContent = 'Network error. Try again.'; });
-            });
-        })();
-        </script>
         <?php
         return ob_get_clean();
+    }
+
+    /**
+     * Enqueue the button script once per page, only on pages that render a button.
+     */
+    private static function enqueue() {
+        if ( wp_script_is( 'griffnode-button', 'enqueued' ) ) {
+            return;
+        }
+        wp_enqueue_script( 'griffnode-button', GRIFFNODE_PLUGIN_URL . 'js/button.js', [], GRIFFNODE_VERSION, true );
+        wp_localize_script( 'griffnode-button', 'griffnodeButton', [
+            'ajax'    => admin_url( 'admin-ajax.php' ),
+            'nonce'   => wp_create_nonce( 'griffnode_pay' ),
+            'pk'      => GriffNode_Settings::get( 'publishable_key' ),
+            'apiBase' => GRIFFNODE_API_BASE,
+            'i18n'    => [
+                'noCryptos'    => __( 'No cryptos configured', 'griffnode-crypto-payments' ),
+                'loadFailed'   => __( 'Failed to load', 'griffnode-crypto-payments' ),
+                'noKey'        => __( 'No publishable key', 'griffnode-crypto-payments' ),
+                'selectCrypto' => __( 'Please select a cryptocurrency.', 'griffnode-crypto-payments' ),
+                'creating'     => __( 'Creating payment…', 'griffnode-crypto-payments' ),
+                'payError'     => __( 'Payment error. Try again.', 'griffnode-crypto-payments' ),
+                'netError'     => __( 'Network error. Try again.', 'griffnode-crypto-payments' ),
+            ],
+        ] );
     }
 
     public static function ajax_create() {
