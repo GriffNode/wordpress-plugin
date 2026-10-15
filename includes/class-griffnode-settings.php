@@ -59,7 +59,7 @@ class GriffNode_Settings {
             'GriffNode',
             'GriffNode',
             'manage_options',
-            'griffnode-payments',
+            'griffnode-crypto-payments',
             [ __CLASS__, 'render_page' ]
         );
     }
@@ -68,8 +68,8 @@ class GriffNode_Settings {
         register_setting( 'griffnode_settings_group', self::OPTION, [ __CLASS__, 'sanitize' ] );
 
         add_settings_section( 'griffnode_main', 'API credentials', function () {
-            echo '<p>' . esc_html__( 'Find these in your GriffNode dashboard under API Integration and Webhooks.', 'griffnode-payments' ) . '</p>';
-        }, 'griffnode-payments' );
+            echo '<p>' . esc_html__( 'Find these in your GriffNode dashboard under API Integration and Webhooks.', 'griffnode-crypto-payments' ) . '</p>';
+        }, 'griffnode-crypto-payments' );
 
         $fields = [
             'publishable_key'  => [ 'Publishable Key (pk_live_ / pk_test_)', 'text', 'Used to fetch your supported cryptos on the page. Safe to expose in the browser.' ],
@@ -89,7 +89,7 @@ class GriffNode_Settings {
                     esc_attr( $val ),
                     esc_html( $help )
                 );
-            }, 'griffnode-payments', 'griffnode_main' );
+            }, 'griffnode-crypto-payments', 'griffnode_main' );
         }
     }
 
@@ -110,24 +110,24 @@ class GriffNode_Settings {
         $webhook_url = rest_url( 'griffnode/v1/webhook' );
         ?>
         <div class="wrap">
-            <h1>GriffNode Payments</h1>
+            <h1>GriffNode Crypto Payments</h1>
             <form method="post" action="options.php">
                 <?php
                 settings_fields( 'griffnode_settings_group' );
-                do_settings_sections( 'griffnode-payments' );
+                do_settings_sections( 'griffnode-crypto-payments' );
                 submit_button();
                 ?>
             </form>
 
             <hr />
-            <h2><?php esc_html_e( 'Webhook endpoint', 'griffnode-payments' ); ?></h2>
-            <p><?php esc_html_e( 'Add this URL in your GriffNode dashboard under Webhooks and subscribe to payment.completed, payment.partial and payment.expired:', 'griffnode-payments' ); ?></p>
+            <h2><?php esc_html_e( 'Webhook endpoint', 'griffnode-crypto-payments' ); ?></h2>
+            <p><?php esc_html_e( 'Add this URL in your GriffNode dashboard under Webhooks and subscribe to payment.completed, payment.partial and payment.expired:', 'griffnode-crypto-payments' ); ?></p>
             <p><code><?php echo esc_url( $webhook_url ); ?></code></p>
 
-            <h2><?php esc_html_e( 'Adding a pay button', 'griffnode-payments' ); ?></h2>
-            <p><?php esc_html_e( 'Drop this shortcode into any post, page or widget:', 'griffnode-payments' ); ?></p>
+            <h2><?php esc_html_e( 'Adding a pay button', 'griffnode-crypto-payments' ); ?></h2>
+            <p><?php esc_html_e( 'Drop this shortcode into any post, page or widget:', 'griffnode-crypto-payments' ); ?></p>
             <p><code>[griffnode_button amount="49.99" currency="USD" button_text="Pay with Crypto"]</code></p>
-            <p class="description"><?php esc_html_e( 'Optional attributes: crypto (lock to one coin), reference (your order id), email (pre-fill), success_url, cancel_url.', 'griffnode-payments' ); ?></p>
+            <p class="description"><?php esc_html_e( 'Optional attributes: crypto (lock to one coin), reference (your order id), email (pre-fill), success_url, cancel_url.', 'griffnode-crypto-payments' ); ?></p>
         </div>
         <?php
     }
