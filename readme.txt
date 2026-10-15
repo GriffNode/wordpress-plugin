@@ -4,7 +4,7 @@ Tags: cryptocurrency, bitcoin, crypto payments, payments, ethereum
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -41,7 +41,19 @@ Bitcoin (BTC), Ethereum (ETH), Litecoin (LTC), Dogecoin (DOGE), Dash (DASH), plu
 * Handles completed, partial and expired payment events.
 * Settings screen for your API keys and the webhook URL.
 
-This plugin connects to the GriffNode API (griffnode.com) to create hosted payment sessions and receive payment webhooks; a free GriffNode account and API key are required.
+A GriffNode account and API keys are required (see External services below).
+
+== External services ==
+
+This plugin relies on the GriffNode API (`api.griffnode.com`), operated by GriffNode, to create crypto payment sessions and to confirm payments. It is not optional: the plugin cannot function without it.
+
+**What is sent, and when:**
+
+* When a page with the `[griffnode_button]` shortcode loads, the visitor's browser fetches the list of cryptocurrencies you have configured wallets for from `https://api.griffnode.com/merchant/cryptos`, authenticated with your Publishable Key (safe to expose, it grants no write access). This request reveals the visitor's IP address to GriffNode.
+* When a visitor clicks the pay button, your site sends the amount, fiat currency, chosen cryptocurrency, your site URL, the button's reference, and (if you set them in the shortcode) the customer email and success/cancel URLs to `https://api.griffnode.com/transactions/create`, authenticated with your Secret Key. The visitor is then redirected to the GriffNode hosted payment page.
+* When the payment status changes, GriffNode sends a signed webhook to your site at `/wp-json/griffnode/v1/webhook`. The plugin verifies the HMAC-SHA256 signature before acting on it.
+
+GriffNode [Terms of Service](https://info.griffnode.com/terms-of-service) and [Privacy Policy](https://info.griffnode.com/privacy-policy).
 
 == Installation ==
 
@@ -76,6 +88,12 @@ Full documentation and shortcode options are at [docs.griffnode.com](https://doc
 3. The hosted payment page with a BIP-21 QR code and live confirmation status.
 
 == Changelog ==
+
+= 1.0.1 =
+* Renamed to GriffNode Crypto Payments.
+* Pay button script is now a properly enqueued file, loaded only on pages that show a button.
+* The cryptocurrency list is built safely with DOM methods and fetched once per page.
+* Documented the external services the plugin uses.
 
 = 1.0.0 =
 * Initial release: shortcode-based non-custodial crypto payments for any WordPress site (BTC, ETH, LTC, DOGE, DASH + USDT/USDC/DAI), hosted checkout, signed webhooks.

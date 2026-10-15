@@ -3,7 +3,7 @@
  * Plugin Name: GriffNode Crypto Payments
  * Plugin URI:  https://docs.griffnode.com/
  * Description: Accept Bitcoin, Ethereum, Litecoin, Dogecoin, Dash and USDT/USDC/DAI stablecoins on any WordPress site. Drop a pay button anywhere with the [griffnode_button] shortcode, no WooCommerce required. Non-custodial, no chargebacks.
- * Version:     1.0.0
+ * Version:     1.0.1
  * Author:      GriffNode
  * Author URI:  https://griffnode.com
  * License:     GPLv2 or later
@@ -15,7 +15,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'GRIFFNODE_VERSION',    '1.0.0' );
+define( 'GRIFFNODE_VERSION',    '1.0.1' );
 define( 'GRIFFNODE_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'GRIFFNODE_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'GRIFFNODE_API_BASE',   'https://api.griffnode.com' );
