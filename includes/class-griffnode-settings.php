@@ -74,7 +74,7 @@ class GriffNode_Settings {
         $fields = [
             'publishable_key'  => [ 'Publishable Key (pk_live_ / pk_test_)', 'text', 'Used to fetch your supported cryptos on the page. Safe to expose in the browser.' ],
             'secret_key'       => [ 'Secret Key (sk_live_ / sk_test_)', 'password', 'Used server-side to create transactions. Never exposed to the browser.' ],
-            'webhook_secret'   => [ 'Webhook Secret', 'password', 'From your dashboard Webhooks page. Verifies incoming payment events.' ],
+            'webhook_secret'   => [ 'Webhook Secret', 'password', 'Business plan and up, from your dashboard Webhooks page: events arrive instantly. Leave empty on the free Starter plan: the plugin checks payment status itself (on return and every 5 minutes) and fires the same actions.' ],
             'default_currency' => [ 'Default Currency', 'text', 'Fiat currency for prices when the shortcode does not set one (USD, PLN, EUR, GBP).' ],
         ];
 

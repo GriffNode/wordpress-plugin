@@ -41,7 +41,27 @@ class GriffNode_API {
         return [
             'ok'          => true,
             'payment_url' => $body['data']['payment_url'],
-            'txid'        => $body['data']['txid'] ?? '',
+            // The create response field is transaction_id (the legacy txid key was retired).
+            'txid'        => $body['data']['transaction_id'] ?? '',
         ];
+    }
+
+    /**
+     * Fetch one transaction (public shape: transaction_id, status, metadata, ...).
+     */
+    public static function get_transaction( string $txid ): ?array {
+        $response = wp_remote_get( GRIFFNODE_API_BASE . '/transactions/' . rawurlencode( $txid ), [
+            'headers' => [
+                'Authorization' => 'Bearer ' . GriffNode_Settings::get( 'secret_key' ),
+                'Accept'        => 'application/json',
+            ],
+            'timeout' => 15,
+        ] );
+        if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+            return null;
+        }
+        $body = json_decode( wp_remote_retrieve_body( $response ), true );
+        $tx   = $body['data'] ?? null;
+        return ( is_array( $tx ) && ( $tx['transaction_id'] ?? '' ) === $txid ) ? $tx : null;
     }
 }
