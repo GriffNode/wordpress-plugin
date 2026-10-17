@@ -5,7 +5,7 @@ defined( 'ABSPATH' ) || exit;
  * [griffnode_button] shortcode — renders a crypto-selector + pay button,
  * and the admin-ajax endpoint that creates the transaction server-side.
  */
-class GriffNode_Shortcode {
+class GriffNode_Pay_Shortcode {
 
     public static function init() {
         add_shortcode( 'griffnode_button', [ __CLASS__, 'render' ] );
@@ -21,7 +21,7 @@ class GriffNode_Shortcode {
     public static function render( $atts ): string {
         $atts = shortcode_atts( [
             'amount'      => '',
-            'currency'    => GriffNode_Settings::get( 'default_currency', 'USD' ),
+            'currency'    => GriffNode_Pay_Settings::get( 'default_currency', 'USD' ),
             'crypto'      => '',      // lock to a single coin; empty = let customer pick
             'button_text' => 'Pay with Crypto',
             'reference'   => '',      // merchant order id, echoed back in webhooks
@@ -30,7 +30,7 @@ class GriffNode_Shortcode {
             'cancel_url'  => '',
         ], $atts, 'griffnode_button' );
 
-        if ( ! GriffNode_Settings::get( 'secret_key' ) ) {
+        if ( ! GriffNode_Pay_Settings::get( 'secret_key' ) ) {
             return current_user_can( 'manage_options' )
                 ? '<p><strong>GriffNode:</strong> configure your API keys under Settings → GriffNode.</p>'
                 : '';
@@ -54,7 +54,7 @@ class GriffNode_Shortcode {
             'success_url' => (string) $atts['success_url'],
             'cancel_url'  => (string) $atts['cancel_url'],
         ];
-        $token = GriffNode_Settings::sign( $config );
+        $token = GriffNode_Pay_Settings::sign( $config );
         $lock  = strtoupper( $atts['crypto'] );
         self::enqueue();
 
@@ -80,12 +80,12 @@ class GriffNode_Shortcode {
         if ( wp_script_is( 'griffnode-button', 'enqueued' ) ) {
             return;
         }
-        wp_enqueue_script( 'griffnode-button', GRIFFNODE_PLUGIN_URL . 'js/button.js', [], GRIFFNODE_VERSION, true );
+        wp_enqueue_script( 'griffnode-button', GRIFFNODE_PAY_PLUGIN_URL . 'js/button.js', [], GRIFFNODE_PAY_VERSION, true );
         wp_localize_script( 'griffnode-button', 'griffnodeButton', [
             'ajax'    => admin_url( 'admin-ajax.php' ),
             'nonce'   => wp_create_nonce( 'griffnode_pay' ),
-            'pk'      => GriffNode_Settings::get( 'publishable_key' ),
-            'apiBase' => GRIFFNODE_API_BASE,
+            'pk'      => GriffNode_Pay_Settings::get( 'publishable_key' ),
+            'apiBase' => GRIFFNODE_PAY_API_BASE,
             'i18n'    => [
                 'noCryptos'    => __( 'No cryptos configured', 'griffnode-crypto-payments' ),
                 'loadFailed'   => __( 'Failed to load', 'griffnode-crypto-payments' ),
@@ -103,7 +103,7 @@ class GriffNode_Shortcode {
             wp_send_json_error( [ 'error' => 'Security check failed. Refresh and try again.' ], 400 );
         }
 
-        $config = GriffNode_Settings::unsign( sanitize_text_field( wp_unslash( $_POST['token'] ?? '' ) ) );
+        $config = GriffNode_Pay_Settings::unsign( sanitize_text_field( wp_unslash( $_POST['token'] ?? '' ) ) );
         if ( ! $config || empty( $config['amount'] ) ) {
             wp_send_json_error( [ 'error' => 'Invalid payment request.' ], 400 );
         }
@@ -129,11 +129,11 @@ class GriffNode_Shortcode {
         if ( ! empty( $config['success_url'] ) ) { $payload['success_url'] = esc_url_raw( $config['success_url'] ); }
         if ( ! empty( $config['cancel_url'] ) )  { $payload['cancel_url'] = esc_url_raw( $config['cancel_url'] ); }
 
-        $result = GriffNode_API::create_transaction( $payload );
+        $result = GriffNode_Pay_API::create_transaction( $payload );
         if ( ! $result['ok'] ) {
             wp_send_json_error( [ 'error' => $result['error'] ], 502 );
         }
-        GriffNode_Webhook::track( $result['txid'] );
+        GriffNode_Pay_Webhook::track( $result['txid'] );
 
         wp_send_json_success( [ 'payment_url' => $result['payment_url'], 'txid' => $result['txid'] ] );
     }
