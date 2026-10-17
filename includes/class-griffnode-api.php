@@ -4,7 +4,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Thin wrapper over the GriffNode REST API using the WordPress HTTP layer.
  */
-class GriffNode_API {
+class GriffNode_Pay_API {
 
     /**
      * Create a hosted-checkout transaction.
@@ -12,12 +12,12 @@ class GriffNode_API {
      * @return array{ok:bool, payment_url?:string, txid?:string, error?:string}
      */
     public static function create_transaction( array $payload ): array {
-        $secret = GriffNode_Settings::get( 'secret_key' );
+        $secret = GriffNode_Pay_Settings::get( 'secret_key' );
         if ( ! $secret ) {
             return [ 'ok' => false, 'error' => 'Secret key not configured.' ];
         }
 
-        $response = wp_remote_post( GRIFFNODE_API_BASE . '/transactions/create', [
+        $response = wp_remote_post( GRIFFNODE_PAY_API_BASE . '/transactions/create', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $secret,
                 'Content-Type'  => 'application/json',
@@ -47,21 +47,26 @@ class GriffNode_API {
     }
 
     /**
-     * Fetch one transaction (public shape: transaction_id, status, metadata, ...).
+     * Fetch up to 100 transactions in one request (public shape: transaction_id, status,
+     * exception, metadata, ...). Records the failure for the admin notice on error.
      */
-    public static function get_transaction( string $txid ): ?array {
-        $response = wp_remote_get( GRIFFNODE_API_BASE . '/transactions/' . rawurlencode( $txid ), [
+    public static function get_transactions( array $ids ): array {
+        if ( ! $ids ) return [];
+        $response = wp_remote_get( GRIFFNODE_PAY_API_BASE . '/transactions/list?ids=' . rawurlencode( implode( ',', $ids ) ), [
             'headers' => [
-                'Authorization' => 'Bearer ' . GriffNode_Settings::get( 'secret_key' ),
+                'Authorization' => 'Bearer ' . GriffNode_Pay_Settings::get( 'secret_key' ),
                 'Accept'        => 'application/json',
             ],
             'timeout' => 15,
         ] );
-        if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
-            return null;
+        $code = is_wp_error( $response ) ? 0 : wp_remote_retrieve_response_code( $response );
+        $body = $code ? json_decode( wp_remote_retrieve_body( $response ), true ) : null;
+        if ( 200 !== $code || ! isset( $body['data']['transactions'] ) ) {
+            $msg = is_wp_error( $response ) ? $response->get_error_message() : ( $body['message'] ?? $body['error'] ?? 'HTTP ' . $code );
+            update_option( 'griffnode_pay_api_error', [ 'time' => time(), 'message' => (string) $msg ], false );
+            return [];
         }
-        $body = json_decode( wp_remote_retrieve_body( $response ), true );
-        $tx   = $body['data'] ?? null;
-        return ( is_array( $tx ) && ( $tx['transaction_id'] ?? '' ) === $txid ) ? $tx : null;
+        delete_option( 'griffnode_pay_api_error' );
+        return $body['data']['transactions'];
     }
 }
