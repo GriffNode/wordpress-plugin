@@ -116,7 +116,8 @@ class GriffNode_Shortcode {
         $payload = [
             'crypto'   => $crypto,
             'amount'   => (float) $config['amount'],
-            'currency' => $config['currency'] ?? 'USD',
+            // The API field is currency_fiat; "currency" is ignored and silently bills USD.
+            'currency_fiat' => $config['currency'] ?? 'USD',
             'metadata' => [
                 'source'    => 'wordpress',
                 'site'      => home_url(),
@@ -132,6 +133,7 @@ class GriffNode_Shortcode {
         if ( ! $result['ok'] ) {
             wp_send_json_error( [ 'error' => $result['error'] ], 502 );
         }
+        GriffNode_Webhook::track( $result['txid'] );
 
         wp_send_json_success( [ 'payment_url' => $result['payment_url'], 'txid' => $result['txid'] ] );
     }

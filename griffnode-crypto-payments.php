@@ -3,7 +3,7 @@
  * Plugin Name: GriffNode Crypto Payments
  * Plugin URI:  https://docs.griffnode.com/
  * Description: Accept Bitcoin, Ethereum, Litecoin, Dogecoin, Dash and USDT/USDC/DAI stablecoins on any WordPress site. Drop a pay button anywhere with the [griffnode_button] shortcode, no WooCommerce required. Non-custodial, no chargebacks.
- * Version:     1.0.1
+ * Version:     1.0.2
  * Author:      GriffNode
  * Author URI:  https://griffnode.com
  * License:     GPLv2 or later
@@ -15,7 +15,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'GRIFFNODE_VERSION',    '1.0.1' );
+define( 'GRIFFNODE_VERSION',    '1.0.2' );
 define( 'GRIFFNODE_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'GRIFFNODE_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'GRIFFNODE_API_BASE',   'https://api.griffnode.com' );
@@ -29,4 +29,16 @@ add_action( 'plugins_loaded', function () {
     GriffNode_Settings::init();
     GriffNode_Shortcode::init();
     GriffNode_Webhook::init();
+    if ( ! wp_next_scheduled( 'griffnode_sync_pending' ) ) {
+        wp_schedule_event( time() + 300, 'griffnode_five_minutes', 'griffnode_sync_pending' );
+    }
+} );
+
+add_filter( 'cron_schedules', function ( $schedules ) {
+    $schedules['griffnode_five_minutes'] = [ 'interval' => 300, 'display' => 'Every 5 minutes (GriffNode)' ];
+    return $schedules;
+} );
+
+register_deactivation_hook( __FILE__, function () {
+    wp_clear_scheduled_hook( 'griffnode_sync_pending' );
 } );
