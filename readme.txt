@@ -93,6 +93,8 @@ Full documentation and shortcode options are at [docs.griffnode.com](https://doc
 * Works on every GriffNode plan. Without a webhook (free Starter plan) the plugin checks payment status through the API when the customer returns and every 5 minutes, and fires the same griffnode_payment_* actions (with source = api_check).
 * Fixed: non-USD buttons were charged in USD (the currency was sent under the wrong field name).
 * Fixed: the transaction id returned after creating a payment was always empty.
+* Webhook events fire once: retries and replays of the same event id are ignored, and events older than 48 hours are refused.
+* The API status check also runs alongside a webhook as a backstop (missed delivery, or a plan downgraded to Starter); each payment still fires once.
 
 = 1.0.1 =
 * Renamed to GriffNode Crypto Payments.

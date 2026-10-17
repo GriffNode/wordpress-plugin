@@ -12,13 +12,15 @@ defined( 'ABSPATH' ) || exit;
  *
  * Endpoint: /wp-json/griffnode/v1/webhook
  *
- * Without a webhook secret (free Starter plan) the same actions fire from an API status
- * check instead: when the customer returns with ?transaction_id= and every 5 minutes for
+ * Without webhooks (free Starter plan) the same actions fire from an API status check
+ * instead: when the customer returns with ?transaction_id= and every 5 minutes for
  * payments created in the last 2 hours. Those events carry 'source' => 'api_check'.
+ * The check also runs with a webhook, as a backstop; each payment fires once either way.
  */
 class GriffNode_Webhook {
 
     const PENDING = 'griffnode_pending'; // option: txid => created timestamp
+    const FINAL   = [ 'payment.completed', 'payment.overpaid', 'payment.partial', 'payment.expired', 'payment.failed' ];
 
     public static function init() {
         add_action( 'griffnode_sync_pending', [ __CLASS__, 'sync_pending' ] );
@@ -52,6 +54,24 @@ class GriffNode_Webhook {
             return new WP_REST_Response( [ 'error' => 'Invalid payload.' ], 400 );
         }
 
+        // Fire each event once. Retries carry the same id; a replayed old delivery is
+        // refused by age (retries stop after 24h, so 48h is generous).
+        $ts = isset( $event['timestamp'] ) ? strtotime( (string) $event['timestamp'] ) : false;
+        if ( $ts && $ts < time() - 2 * DAY_IN_SECONDS ) {
+            return new WP_REST_Response( [ 'error' => 'Event too old.' ], 400 );
+        }
+        if ( ! empty( $event['id'] ) ) {
+            $seen = 'griffnode_evt_' . md5( (string) $event['id'] );
+            if ( get_transient( $seen ) ) {
+                return new WP_REST_Response( [ 'ok' => true, 'duplicate' => true ], 200 );
+            }
+            set_transient( $seen, 1, 2 * DAY_IN_SECONDS );
+        }
+
+        // A final status arrived by webhook: the API check must not fire it again.
+        if ( ! empty( $event['transaction_id'] ) && in_array( $event['event'], self::FINAL, true ) ) {
+            self::untrack( (string) $event['transaction_id'] );
+        }
         self::dispatch( $event );
 
         return new WP_REST_Response( [ 'ok' => true ], 200 );
@@ -68,9 +88,9 @@ class GriffNode_Webhook {
 
     // ── API status check (no webhook, e.g. Starter plan) ──────────────────────
 
-    /** Remember a new payment so the status check can follow it. No-op with a webhook. */
+    /** Remember a new payment so the status check can follow it. */
     public static function track( string $txid ): void {
-        if ( ! $txid || GriffNode_Settings::get( 'webhook_secret' ) ) return;
+        if ( ! $txid ) return;
         // ponytail: read-modify-write on one option; a lost write under heavy concurrent
         // checkout only delays that payment's check. Fine at Starter volume.
         $pending          = get_option( self::PENDING, [] );
@@ -99,16 +119,21 @@ class GriffNode_Webhook {
         }
     }
 
+    /** Stop following a payment. Returns whether it was being followed. */
+    private static function untrack( string $txid ): bool {
+        $pending = get_option( self::PENDING, [] );
+        if ( ! isset( $pending[ $txid ] ) ) return false;
+        unset( $pending[ $txid ] );
+        update_option( self::PENDING, $pending, false );
+        return true;
+    }
+
     /** Fire the webhook actions once the payment reaches a final status, then forget it. */
     private static function check( string $txid ): void {
         $tx     = GriffNode_API::get_transaction( $txid );
         $status = $tx['status'] ?? '';
-        if ( ! in_array( $status, [ 'completed', 'overpaid', 'partial', 'expired', 'failed' ], true ) ) return;
-
-        $pending = get_option( self::PENDING, [] );
-        if ( ! isset( $pending[ $txid ] ) ) return; // already handled
-        unset( $pending[ $txid ] );
-        update_option( self::PENDING, $pending, false );
+        if ( ! in_array( 'payment.' . $status, self::FINAL, true ) ) return;
+        if ( ! self::untrack( $txid ) ) return; // already handled (webhook or earlier check)
 
         self::dispatch( array_merge( $tx, [
             'event'           => 'payment.' . $status,
