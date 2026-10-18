@@ -49,8 +49,9 @@ This plugin relies on the GriffNode API (`api.griffnode.com`), operated by Griff
 
 **What is sent, and when:**
 
-* When a page with the `[griffnode_button]` shortcode loads, the visitor's browser fetches the list of cryptocurrencies you have configured wallets for from `https://api.griffnode.com/merchant/cryptos`, authenticated with your Publishable Key (safe to expose, it grants no write access). This request reveals the visitor's IP address to GriffNode.
-* When a visitor clicks the pay button, your site sends the amount, fiat currency, chosen cryptocurrency, your site URL, the button's reference, and (if you set them in the shortcode) the customer email and success/cancel URLs to `https://api.griffnode.com/transactions/create`, authenticated with your Secret Key. The visitor is then redirected to the GriffNode hosted payment page.
+* When a page with the `[griffnode_button]` shortcode loads, the visitor's browser fetches the list of cryptocurrencies you have configured wallets for from the API endpoint `api.griffnode.com/merchant/cryptos`, authenticated with your Publishable Key (safe to expose, it grants no write access). This request reveals the visitor's IP address to GriffNode.
+* When a visitor clicks the pay button, your site sends the amount, fiat currency, chosen cryptocurrency, your site URL, the button's reference, and (if you set them in the shortcode) the customer email and success/cancel URLs to the API endpoint `api.griffnode.com/transactions/create`, authenticated with your Secret Key. The visitor is then redirected to the GriffNode hosted payment page.
+* While any payment made through your site is open (at most 7 days), your site sends the IDs of those open payments to the API endpoint `api.griffnode.com/transactions/list` every 30 seconds, authenticated with your Secret Key, to read their status. It stops when no payment is open.
 * When the payment status changes, GriffNode sends a signed webhook to your site at `/wp-json/griffnode/v1/webhook`. The plugin verifies the HMAC-SHA256 signature before acting on it.
 
 GriffNode [Terms of Service](https://info.griffnode.com/terms-of-service) and [Privacy Policy](https://info.griffnode.com/privacy-policy).
