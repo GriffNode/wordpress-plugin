@@ -4,7 +4,7 @@ Tags: cryptocurrency, bitcoin, crypto payments, payments, ethereum
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -89,6 +89,9 @@ Full documentation and shortcode options are at [docs.griffnode.com](https://doc
 3. The hosted payment page with a BIP-21 QR code and live confirmation status.
 
 == Changelog ==
+
+= 1.0.3 =
+* Webhook signature check no longer uses str_starts_with(), so nothing in the plugin needs PHP 8.
 
 = 1.0.2 =
 * Works on every GriffNode plan. Without a webhook (free Starter plan) the plugin checks all open payments every 30 seconds in one request and fires the same griffnode_payment_* actions (with source = api_check). It does not depend on site visitors, and stops when no payment is open.
