@@ -58,7 +58,7 @@ class GriffNode_Pay_Webhook {
 
         $raw       = $request->get_body();
         $sig       = $request->get_header( 'x_griffnode_signature' ) ?? '';
-        $received  = str_starts_with( $sig, 'sha256=' ) ? substr( $sig, 7 ) : $sig;
+        $received  = 0 === strpos( $sig, 'sha256=' ) ? substr( $sig, 7 ) : $sig;
         $expected  = hash_hmac( 'sha256', $raw, $secret );
 
         if ( ! $received || ! hash_equals( $expected, $received ) ) {
@@ -160,11 +160,9 @@ class GriffNode_Pay_Webhook {
         update_option( self::BEAT, time(), true );
 
         if ( self::poll() ) {
-            // ponytail: one PHP worker sleeps between checks while payments are open; a host
-            // with a hard request timeout under ~40s breaks the chain and kick() restarts it.
-            if ( function_exists( 'set_time_limit' ) ) {
-                @set_time_limit( 3 * self::INTERVAL ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-            }
+            // ponytail: one PHP worker sleeps between checks while payments are open. sleep()
+            // does not count toward max_execution_time (except on Windows); a host with a hard
+            // request timeout under ~40s breaks the chain and kick() restarts it.
             sleep( self::INTERVAL );
             delete_transient( self::LOCK );
             self::spawn();
