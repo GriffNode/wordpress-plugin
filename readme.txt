@@ -4,7 +4,7 @@ Tags: cryptocurrency, bitcoin, crypto payments, payments, ethereum
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -89,6 +89,10 @@ Full documentation and shortcode options are at [docs.griffnode.com](https://doc
 3. The hosted payment page with a BIP-21 QR code and live confirmation status.
 
 == Changelog ==
+
+= 1.0.4 =
+* Fixed: the griffnode_payment_* actions never fired (the name lost its underscore). The griffnode_webhook action was not affected.
+* The status check is scheduled only once a payment is open, never while WordPress is still loading, which fixes an early translation-loading notice with WooCommerce on non-English sites.
 
 = 1.0.3 =
 * Webhook signature check no longer uses str_starts_with(), so nothing in the plugin needs PHP 8.

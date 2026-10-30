@@ -42,12 +42,11 @@ class GriffNode_Pay_Webhook {
             register_rest_route( 'griffnode/v1', '/poll', [
                 'methods'             => 'GET',
                 'callback'            => [ __CLASS__, 'handle_loop' ],
-                'permission_callback' => '__return_true', // verified by the secret k below
+                'permission_callback' => function ( WP_REST_Request $request ) {
+                    return hash_equals( self::key(), (string) $request->get_param( 'k' ) );
+                },
             ] );
         } );
-        if ( ! wp_next_scheduled( 'griffnode_pay_poll_kick' ) ) {
-            wp_schedule_event( time() + 60, 'griffnode_pay_minute', 'griffnode_pay_poll_kick' );
-        }
     }
 
     public static function handle( WP_REST_Request $request ) {
@@ -109,7 +108,7 @@ class GriffNode_Pay_Webhook {
         do_action( 'griffnode_webhook', $event );
 
         // Specific hook, e.g. payment.completed -> griffnode_payment_completed.
-        $name = str_replace( '.', '_', sanitize_key( $event['event'] ) );
+        $name = sanitize_key( str_replace( '.', '_', $event['event'] ) );
         do_action( 'griffnode_' . $name, $event );
     }
 
@@ -139,7 +138,13 @@ class GriffNode_Pay_Webhook {
 
     /** Start the loop if payments are open and no run happened recently. */
     public static function kick(): void {
-        if ( ! get_option( self::PENDING ) || get_transient( self::LOCK ) ) return;
+        if ( ! get_option( self::PENDING ) ) return;
+        // Never before the init action: scheduling runs the cron_schedules filter, and other
+        // plugins translate labels in it, which WordPress reports as loading translations too early.
+        if ( ! wp_next_scheduled( 'griffnode_pay_poll_kick' ) ) {
+            wp_schedule_event( time() + 60, 'griffnode_pay_minute', 'griffnode_pay_poll_kick' );
+        }
+        if ( get_transient( self::LOCK ) ) return;
         if ( time() - (int) get_option( self::BEAT, 0 ) < 3 * self::INTERVAL ) return;
         // A start is already on its way (loopback not running yet): don't start a second loop.
         if ( get_transient( 'griffnode_pay_poll_spawned' ) ) return;
@@ -148,10 +153,7 @@ class GriffNode_Pay_Webhook {
     }
 
     /** Loopback entry point: GET /wp-json/griffnode/v1/poll?k=<key>. */
-    public static function handle_loop( WP_REST_Request $request ) {
-        if ( ! hash_equals( self::key(), (string) $request->get_param( 'k' ) ) ) {
-            return new WP_REST_Response( [ 'error' => 'Forbidden.' ], 403 );
-        }
+    public static function handle_loop() {
         ignore_user_abort( true );
         if ( get_transient( self::LOCK ) ) {
             return new WP_REST_Response( [ 'ok' => true, 'running' => true ], 200 );
