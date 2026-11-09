@@ -2,7 +2,7 @@
 
 Accept Bitcoin, Litecoin, Dogecoin and Dash payments on **any** WordPress site — no WooCommerce required. Drop a pay button anywhere with a shortcode; customers pick a coin and are redirected to a hosted payment page. Funds go directly to your wallet, GriffNode never holds them.
 
-> Running a WooCommerce store? Use the dedicated [GriffNode for WooCommerce](https://github.com/GriffNode/woocommerce-plugin) plugin instead — it hooks straight into checkout and orders.
+> Running a WooCommerce store? Use the dedicated [GriffNode for WooCommerce](https://wordpress.org/plugins/griffnode-for-woocommerce/) plugin instead — it hooks straight into checkout and orders.
 
 **Requirements:** WordPress 6.0+, PHP 7.4+
 
@@ -10,17 +10,23 @@ Accept Bitcoin, Litecoin, Dogecoin and Dash payments on **any** WordPress site �
 
 ## Installation
 
-### 1 — Download
+### 1 — Install
 
-Download the latest `griffnode-crypto-payments.zip` from the [Releases](https://github.com/GriffNode/wordpress-plugin/releases) page.
+There are two ways to install it. Both are the same plugin.
 
-### 2 — Install
+**Option 1 (recommended): WordPress.org.** The plugin is in the [official WordPress.org directory](https://wordpress.org/plugins/griffnode-crypto-payments/), so updates arrive automatically.
 
-1. In WordPress admin go to **Plugins → Add New → Upload Plugin**
-2. Choose the downloaded ZIP and click **Install Now**
-3. Click **Activate Plugin**
+1. In WordPress admin go to **Plugins → Add New**
+2. Search for **GriffNode**
+3. On **GriffNode Crypto Payments** click **Install Now**, then **Activate**
 
-### 3 — Configure
+**Option 2: ZIP from GitHub.** Use this if your host blocks installs from the directory.
+
+1. Download the latest `griffnode-crypto-payments.zip` from the [Releases](https://github.com/GriffNode/wordpress-plugin/releases) page
+2. In WordPress admin go to **Plugins → Add New → Upload Plugin**
+3. Choose the ZIP, click **Install Now**, then **Activate Plugin**
+
+### 2 — Configure
 
 Go to **Settings → GriffNode** and fill in:
 
@@ -31,7 +37,7 @@ Go to **Settings → GriffNode** and fill in:
 | **Webhook Secret** | Dashboard → Webhooks → your endpoint's signing secret |
 | **Default Currency** | Fiat used when a shortcode doesn't set one (USD, PLN, EUR, GBP) |
 
-### 4 — Register your webhook
+### 3 — Register your webhook
 
 In your [GriffNode dashboard](https://griffnode.com/dashboard) go to **Webhooks** and add the URL shown on the settings page:
 
@@ -41,7 +47,7 @@ https://yoursite.com/wp-json/griffnode/v1/webhook
 
 Subscribe to: `payment.completed`, `payment.partial`, `payment.expired`. Copy the signing secret into the **Webhook Secret** field.
 
-### 5 — Add wallets
+### 4 — Add wallets
 
 The coin selector only shows cryptos you have wallets for. Go to **Dashboard → Wallet Management** and add an xpub for each coin you want to accept.
 
@@ -112,4 +118,5 @@ Use `pk_test_...` / `sk_test_...` keys in the settings. No real funds move in te
 
 - [Documentation](https://docs.griffnode.com)
 - [GriffNode Dashboard](https://griffnode.com/dashboard) — open a support ticket
+- [WordPress.org support forum](https://wordpress.org/support/plugin/griffnode-crypto-payments/)
 - [GitHub Issues](https://github.com/GriffNode/wordpress-plugin/issues)
